@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// =============================================================
+// FILE: prisma/schema.prisma
+// =============================================================
+// This file defines the SHAPE of our database.
+// Think of each "model" as a TABLE.
+// Each field inside a model is a COLUMN.
+//
+// AFTER EDITING THIS FILE, ALWAYS RUN:
+//   npx prisma db push     (applies changes to the database)
+//   npx prisma generate    (updates the TypeScript client)
+// =============================================================
+
+// "Generator" tells Prisma to create a JavaScript/TypeScript
+// client library that we import in our API routes
+generator client {
+  provider = "prisma-client-js"
+}
+
+// "Datasource" tells Prisma WHERE the database lives
+// "sqlite" = a simple file-based database (no server needed!)
+// The URL "file:./dev.db" means the database file will be
+// created at prisma/dev.db
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================
+// USER TABLE — Stores patient information
+// =============================================================
+// WHY: Every patient needs a record with login credentials.
+// RELATIONSHIPS:
+//   One User → Many Appointments  (a patient can have multiple appointments)
+//   One User → Many Prescriptions (a patient can have multiple prescriptions)
+// =============================================================
+model User {
+  id            Int            @id @default(autoincrement())
+  //            ^^^            ^^^ primary key, auto-increments (1, 2, 3...)
+  name          String                     // Patient's full name
+  email         String         @unique     // @unique = no two patients can share an email
+  password      String                     // Hashed password (NEVER plain text!)
+  createdAt     DateTime       @default(now())   // Auto-set when record is created
+  updatedAt     DateTime       @updatedAt        // Auto-updated whenever any field changes
+
+  // These are "relation fields" — they DON'T create database columns.
+  // They tell Prisma: "when I query a User, I can ALSO get their appointments"
+  appointments  Appointment[]
+  prescriptions Prescription[]
+}
+
+// =============================================================
+// APPOINTMENT TABLE — Stores scheduled appointments
+// =============================================================
+// WHY: Patients need scheduled visits with their doctors.
+// Each appointment belongs to exactly ONE patient.
+// Supports recurring (weekly/monthly) appointments.
+// =============================================================
+model Appointment {
+  id        Int       @id @default(autoincrement())
+  provider  String                        // Doctor's name (e.g., "Dr Kim West")
+  datetime  DateTime                      // When the appointment is
+  repeat    String                        // "weekly", "monthly", or "none"
+  endDate   DateTime?                     // The ? makes this NULLABLE
+  //                                         (can be empty — used to stop
+  //                                         recurring appointments)
+
+  // FOREIGN KEY: Links this appointment to a specific user
+  userId    Int                           // This column holds the User's ID
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  //                   fields: [userId]    → "this table's column"
+  //                   references: [id]    → "points to User.id"
+  //                   onDelete: Cascade   → "if user is deleted, delete their appointments too"
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// =============================================================
+// PRESCRIPTION TABLE — Stores prescribed medications
+// =============================================================
+// WHY: Patients need to track their medications and refill schedules.
+// =============================================================
+model Prescription {
+  id             Int      @id @default(autoincrement())
+  medication     String                    // e.g., "Lexapro"
+  dosage         String                    // e.g., "5mg"
+  quantity       Int                       // Number of units per refill
+  refillOn       DateTime                  // Next refill date
+  refillSchedule String                    // "monthly" or "weekly"
+
+  userId         Int                       // Foreign key → User.id
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// =============================================================
+// REFERENCE TABLES — Allowed medications and dosages
+// =============================================================
+// WHY: The admin form needs dropdown options for medications
+// and dosages. Instead of hardcoding them in the frontend,
+// we store them in the database (easier to update later).
+// =============================================================
+model Medication {
+  id   Int    @id @default(autoincrement())
+  name String @unique                      // e.g., "Lexapro", "Ozempic"
+}
+
+model Dosage {
+  id    Int    @id @default(autoincrement())
+  value String @unique                      // e.g., "5mg", "100mg"
+}
+

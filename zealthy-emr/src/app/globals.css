@@ -1,0 +1,89 @@
+/* =============================================================
+   FILE: src/app/globals.css
+   =============================================================
+   Tailwind CSS works by providing UTILITY CLASSES you add to HTML.
+   Example: <div className="flex p-4 text-lg bg-blue-500">
+   
+   These three @tailwind directives import Tailwind's layers:
+   - base:       browser reset + defaults
+   - components: pre-built component classes  
+   - utilities:  the utility classes (flex, p-4, text-lg, etc.)
+   ============================================================= */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-950 text-gray-100 antialiased;
+}
+
+/* Dark theme overrides */
+.bg-white {
+  background-color: #1a1a2e !important;
+}
+
+.bg-gray-50 {
+  background-color: #0f0f23 !important;
+}
+
+.border-gray-200, .border-gray-100 {
+  border-color: #2a2a4a !important;
+}
+
+.text-gray-900 {
+  color: #f1f1f1 !important;
+}
+
+.text-gray-700 {
+  color: #c4c4d4 !important;
+}
+
+.text-gray-500 {
+  color: #9090a8 !important;
+}
+
+.text-gray-400 {
+  color: #7070888 !important;
+}
+
+.bg-gray-50.border-b {
+  background-color: #151530 !important;
+}
+
+/* Keep buttons bright */
+.bg-emerald-600 { background-color: #059669 !important; }
+.bg-blue-600 { background-color: #2563eb !important; }
+.bg-purple-600 { background-color: #9333ea !important; }
+
+/* Form inputs dark */
+input, select {
+  background-color: #12122a !important;
+  border-color: #3a3a5a !important;
+  color: #e4e4f0 !important;
+}
+
+/* Modal backdrop */
+.bg-black\/40 {
+  background-color: rgba(0,0,0,0.7) !important;
+}
+
+/* Table hover */
+tr.hover\:bg-gray-50:hover {
+  background-color: #1e1e3a !important;
+}
+
+/* Nav bar */
+nav.bg-white {
+  background-color: #12122a !important;
+}
+
+/* Fix dropdown text visibility */
+select {
+  color: #e4e4f0 !important;
+  background-color: #12122a !important;
+}
+
+select option {
+  color: #e4e4f0 !important;
+  background-color: #1a1a2e !important;
+}
