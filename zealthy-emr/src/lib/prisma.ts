@@ -13,36 +13,20 @@
 // =============================================================
 
 import { PrismaClient } from '@prisma/client';
-import fs from 'fs';
-import path from 'path';
-
-function getDbPath() {
-  // On Vercel, copy the database to /tmp (writable directory)
-  if (process.env.VERCEL) {
-    const tmpDb = '/tmp/dev.db';
-    if (!fs.existsSync(tmpDb)) {
-      // Try to copy from the build output
-      const sourceDb = path.join(process.cwd(), 'prisma', 'dev.db');
-      if (fs.existsSync(sourceDb)) {
-        fs.copyFileSync(sourceDb, tmpDb);
-      }
-    }
-    return `file:${tmpDb}`;
-  }
-  return process.env.DATABASE_URL || 'file:./dev.db';
-}
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    datasources: {
-      db: {
-        url: getDbPath(),
-      },
+const databaseUrl = process.env.POSTGRES_PRISMA_URL 
+  || process.env.DATABASE_URL 
+  || 'postgresql://neondb_owner:npg_wFNH5DdBYu1E@ep-restless-frog-at56r6n8-pooler.c-9.us-east-1.aws.neon.tech/neondb?connect_timeout=15&sslmode=require';
+
+export const prisma = globalForPrisma.prisma || new PrismaClient({
+  datasources: {
+    db: {
+      url: databaseUrl,
     },
-  });
+  },
+});
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
